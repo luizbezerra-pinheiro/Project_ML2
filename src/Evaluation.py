@@ -6,6 +6,6 @@ class Evaluation:
         pass
 
 
-
 ## Tests
-if __name__ == "__main__"
+if __name__ == "__main__":
+    exit()
