@@ -10,20 +10,20 @@ We are given a dataset of the client characteristics and if the company issued c
 
 ## Overview of the problem
 
-#### What is the objective?
+### What is the objective?
 
 Increase the profit of the company by issuing credit to a trusted client 
 
-#### How will our solution be used?
+### How will our solution be used?
 
 In summary, our model will be used to detect the trusted clients and 
 then make money with them by issuing credit. 
 
-#### Type of the problem
+### Type of the problem
 
 Binary classification (Supervised Learning) by using batch learning. 
 
-#### How should performance be measured? 
+### How should performance be measured? 
 Is the performance aligned with the business objective?**
 
 The objective is to maximize our revenue by issuing credit to the clients. In other 
@@ -50,7 +50,7 @@ We are looking for a high recall and a low false positive. The ROC curve shows t
 between the recall and the false positive rate. We can use the AUC (area under the curve 
 ROC) as a performance measure. AUC is a good metric for imbalanced classification problems.
 
-#### What is the minimum performance?
+### What is the minimum performance?
 
 *First method:* The minimum performance is zero, which means that we can not lose money.
 
