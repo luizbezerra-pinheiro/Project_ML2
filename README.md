@@ -46,9 +46,8 @@ measure. But, if we have 75 positives whose 5 are not trusted, then the revenue 
 
 In order to normalize this value, we will consider the following performance :
 
-$$
-\dfrac{a}{b}
-$$
+<img src="https://render.githubusercontent.com/render/math?math=\dfrac{TP-FP}{TP %2B FN}">
+
 
 ***Second method (ROC curve and AUC)***
 
