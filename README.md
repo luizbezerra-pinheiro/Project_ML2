@@ -32,7 +32,7 @@ predicted as trusted) with few false positives (untrusted clients predicted as t
 
 ***First method (Hyphotetical revenue)*** 
 
-Since we don't have any information about the quantity of credit issue that will be 
+Since we don't have any information about the amount of credit issue that will be 
 issued to the clients, we can consider the revenue obtained by the company as:
 
 - 1, for each true positives
@@ -43,6 +43,12 @@ If we have, for example, 100 clients predicted as positive whose 20 are not trus
 the hypothetical revenue of the company is 80 - 20 = 60, according to our performance 
 measure. But, if we have 75 positives whose 5 are not trusted, then the revenue will be
 70 - 5 = 65, which is better than the first case.
+
+In order to normalize this value, we will consider the following performance :
+
+$$
+\dfrac{a}{b}
+$$
 
 ***Second method (ROC curve and AUC)***
 
