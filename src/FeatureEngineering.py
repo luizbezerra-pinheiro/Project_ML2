@@ -2,19 +2,37 @@ import os
 
 import pandas as pd
 from copy import copy
+import numpy as np
 
 
-def convert_categorical(df, categorical_variables):
-    # Use LabelEncoder from sklearn to convert the categorical variables into numerical
-    for column in categorical_variables:
-        # converting type of columns to 'category'
-        df[column] = df[column].astype('category')
-        # Assigning numerical values and storing in another column
-        df[column] = df[column].cat.codes
+class FeatEng:
+    def __init__(self, df):
+        self.df = df
+        self.categorical_variables = ['Customer_Type', 'Educational_Level', 'Marital_Status',
+                                     'P_Client', 'Prod_Category', 'Prod_Sub_Category',
+                                     'Source', 'Type_Of_Residence']
+        self.datetime_variables = ['BirthDate', 'Customer_Open_Date', 'Prod_Decision_Date', 'Prod_Closed_Date']
 
 
-def transform(df, categorical_variables):
-    convert_categorical(df, categorical_variables)
+    def transform(self, df):
+        self.convert_categorical(df)
+        df = df[["Years_At_Residence", 'Net_Annual_Income', 'Y']]
+        df = df[~df["Net_Annual_Income"].isna()]
+        df["Net_Annual_Income"] = df["Net_Annual_Income"].str.replace(",", ".").astype("float64")
+        # print("oi")
+        # print(df[df["Net_Annual_Income"] == "14,4"])
+        # # df["Net_Annual_Income"].str.replace(",", ".")
+        # print(df["Net_Annual_Income"].str.replace(",", "."))
+        return np.array(df[["Years_At_Residence", 'Net_Annual_Income']]), np.array(df["Y"])
+
+
+    def convert_categorical(self, df):
+        # Use LabelEncoder from sklearn to convert the categorical variables into numerical
+        for column in self.categorical_variables:
+            # converting type of columns to 'category'
+            df[column] = df[column].astype('category')
+            # Assigning numerical values and storing in another column
+            df[column] = df[column].cat.codes
 
 
 ## Tests
@@ -22,12 +40,8 @@ if __name__ == "__main__":
     data_path = os.path.join(os.path.dirname(os.getcwd()), "data", "CreditTraining.csv")
     df = pd.read_csv(data_path)
 
-    # Define categorical_variables to be converted
-    categorical_variables = ['Customer_Type', 'Educational_Level', 'Marital_Status',
-                             'P_Client', 'Prod_Category', 'Prod_Sub_Category',
-                             'Source', 'Type_Of_Residence']
-
     df_fe = copy(df)
-    transform(df_fe, categorical_variables)
+    myFE = FeatEng()
+    X, y = myFE.transform(df_fe)
     print(df.head())
-    print(df_fe.head())
+    print(X[:5])

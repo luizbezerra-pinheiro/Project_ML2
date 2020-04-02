@@ -44,9 +44,9 @@ the hypothetical revenue of the company is 80 - 20 = 60, according to our perfor
 measure. But, if we have 75 positives whose 5 are not trusted, then the revenue will be
 70 - 5 = 65, which is better than the first case.
 
-In order to normalize this value, we will consider the following performance :
+In order to normalize this value, we will divide it by the ideal revenue : 
 
-<img src="https://render.githubusercontent.com/render/math?math=\dfrac{TP-FP}{TP %2B FN}">
+(TP-FP) / (TP+FN)
 
 
 ***Second method (ROC curve and AUC)***
@@ -58,6 +58,7 @@ ROC) as a performance measure. AUC is a good metric for imbalanced classificatio
 ### What is the minimum performance?
 
 *First method:* The minimum performance is zero, which means that we can not lose money.
+And the maximum value we can obtain is 1.
 
 *Second method :* Predicting randomly always produces an AUC
 of 0.5, no matter how imbalanced the classes in a dataset are.
