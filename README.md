@@ -32,7 +32,7 @@ predicted as trusted) with few false positives (untrusted clients predicted as t
 
 ***First method (Hyphotetical revenue)*** 
 
-Since we don't have any information about the quantity of credit issue that will be 
+Since we don't have any information about the amount of credit issue that will be 
 issued to the clients, we can consider the revenue obtained by the company as:
 
 - 1, for each true positives
@@ -44,6 +44,11 @@ the hypothetical revenue of the company is 80 - 20 = 60, according to our perfor
 measure. But, if we have 75 positives whose 5 are not trusted, then the revenue will be
 70 - 5 = 65, which is better than the first case.
 
+In order to normalize this value, we will divide it by the ideal revenue : 
+
+(TP-FP) / (TP+FN)
+
+
 ***Second method (ROC curve and AUC)***
 
 We are looking for a high recall and a low false positive. The ROC curve shows the nuances
@@ -53,6 +58,7 @@ ROC) as a performance measure. AUC is a good metric for imbalanced classificatio
 ### What is the minimum performance?
 
 *First method:* The minimum performance is zero, which means that we can not lose money.
+And the maximum value we can obtain is 1.
 
 *Second method :* Predicting randomly always produces an AUC
 of 0.5, no matter how imbalanced the classes in a dataset are.
