@@ -12,7 +12,7 @@ Class responsible for giving the database
 class GetData:
     def __init__(self):
         self.data_path = os.path.join(os.path.dirname(os.getcwd()), "data", "CreditTraining.csv")
-        self.df = copy(pd.read_csv(self.data_path))
+        self.df = pd.read_csv(self.data_path, decimal=',')
 
     """
     Method called by the user to get the data split and organized 
