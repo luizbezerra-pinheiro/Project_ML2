@@ -1,6 +1,8 @@
 import os
 from copy import copy
+
 import pandas as pd
+
 from sklearn.model_selection import train_test_split
 
 
@@ -39,6 +41,9 @@ Testing the functions of the class
 """
 if __name__ == "__main__":
     df_train, df_test = GetData().get()
+
+    print("\n### Printing the data\n")
+    print(df_train)
 
     print("\n### Analysing each dataset")
 

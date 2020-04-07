@@ -34,7 +34,7 @@ if __name__ == "__main__":
     scores = cross_val_score(clf, X_train, y_train, cv=5)
     print(scores.mean())
     scores2 = cross_val_score(clf2, X_train, y_train, cv=5)
-    print(scores.mean())
+    print(scores2.mean())
 
     clf.fit(X_train, y_train)
     clf2.fit(X_train, y_train)
@@ -43,8 +43,8 @@ if __name__ == "__main__":
     y_pred = clf.predict(X_test)
     y_train_pred = clf.predict(X_train)
 
-    y_pred2 = clf.predict(X_test)
-    y_train_pred2 = clf.predict(X_train)
+    y_pred2 = clf2.predict(X_test)
+    y_train_pred2 = clf2.predict(X_train)
 
 
     # Performance
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
     #print(confusion_matrix(y_train, y_train_pred2))
     tn, fp, fn, tp = confusion_matrix(y_train, y_train_pred2).ravel()
-    print("\nRandomForest:\nTrain\n\tPerformance:", (tp - fp) / (tp + fn))
+    print("\nTrain\n\tPerformance train:", (tp - fp) / (tp + fn))
     print("\tf1-score: ", f1_score(y_train, y_train_pred2))
 
 
