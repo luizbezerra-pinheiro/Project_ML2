@@ -18,6 +18,7 @@ from sklearn.linear_model import LogisticRegression
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
 
+from tqdm import tqdm
 
 if __name__ == "__main__":
     # Get data
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     perf_under = []
     # For each split
     # i = 1
-    for train_index, test_index in skf.split(X, y):
+    for train_index, test_index in tqdm(skf.split(X, y)):
         # print("\n###", i, "\n")
         # i += 1
 
