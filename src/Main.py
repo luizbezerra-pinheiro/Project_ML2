@@ -24,7 +24,7 @@ if __name__ == "__main__":
     df_train, df_test = GetData().get()
 
     # Feature Engineering of df_train
-    myFE = FeatEng(selected_feat=True)
+    myFE = FeatEng()
     myFE.fit(df_train)
     X, y = myFE.transform(df_train)
 
@@ -59,9 +59,9 @@ if __name__ == "__main__":
         myModel_under.fit(X_under, y_under)
 
         #Evaluation of the models
-        eval_over = Evaluation(myModel_over, X_over, y_over, X_test, y_test, verbatim=False)
+        eval_over = Evaluation(myModel_over, X_over, y_over, X_test, y_test, verbose=False)
         perf_over.append(eval_over.eval)
-        eval_under = Evaluation(myModel_under, X_under, y_under, X_test, y_test, verbatim=False)
+        eval_under = Evaluation(myModel_under, X_under, y_under, X_test, y_test, verbose=False)
         perf_under.append(eval_under.eval)
 
     perf_over = np.array(perf_over)
@@ -106,8 +106,8 @@ if __name__ == "__main__":
     X_test, y_test = myFE.transform(df_test)
 
     # Evaluation
-    eval_over = Evaluation(myModel_over, X_over, y_over, X_test, y_test, verbatim=True)
-    eval_under = Evaluation(myModel_under, X_under, y_under, X_test, y_test, verbatim=True)
+    eval_over = Evaluation(myModel_over, X_over, y_over, X_test, y_test, verbose=True)
+    eval_under = Evaluation(myModel_under, X_under, y_under, X_test, y_test, verbose=True)
 
     #
     #
