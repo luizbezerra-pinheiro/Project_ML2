@@ -1,6 +1,8 @@
 from src.GetData import GetData
 
 from IPython.core.display import display
+import datetime as dt
+
 import pandas as pd
 import numpy as np
 
@@ -36,8 +38,19 @@ class FeatEng:
         self.one_hot = False  # We don't have yet the encoder
         self.encoders = 0
 
+        # Assumption
+        self.today = dt.datetime(2014, 1, 1)
+        self.mode = {"Number_Of_Dependant": -1,
+                     "Net_Annual_Income": -1,
+                     "Years_At_Business": -1
+                     }
+
 
     def fit(self, df):
+        # Mode and mean for missing values
+        for d in ["Number_Of_Dependant", "Net_Annual_Income", "Years_At_Business"]:
+            self.mode[d] = float(df[d].mode())
+
         # Fitting OneHotEncoder
         self.encoders = OneHotEncoder(handle_unknown='ignore')
         self.encoders.fit(df[self.categorical_features])
@@ -48,6 +61,8 @@ class FeatEng:
         # Treating categorical and numerical variables
         df = self.convert_categorical(df)
         df = self.cast_numerical(df)
+        df = self.preprocess_datetime(df)
+        df = self.missing_values(df)
 
         # select columns, if in case
         if self.selected_feat:
@@ -93,7 +108,38 @@ class FeatEng:
         return df
 
 
-    # def preprocess_datetime(self, df):
+    def preprocess_datetime(self, df):
+        # Changing the type of the column
+        for d in self.datetime_variables:
+            df[d] = pd.to_datetime(df[d])
+
+        # Age from BirthDate
+        df["age"] = df["BirthDate"].apply(lambda x: (self.today - x).days//365)
+        df = df.drop("BirthDate", axis=1)
+
+        # Months from Customer_Open_Date
+        df["months_customer"] = df["Customer_Open_Date"].apply(lambda x: (self.today - x).days//30)
+        df = df.drop("Customer_Open_Date", axis=1)
+
+        # Months from Prod_Decision_Date
+        df["months_decision"] = df["Prod_Decision_Date"].apply(lambda x: (self.today - x).days // 30)
+        df = df.drop("Prod_Decision_Date", axis=1)
+
+        # Months from Prod_Closed_Date and boolean if exists Prod_Closed_Date
+        df["exist_closed"] = df["Prod_Closed_Date"].notnull() * 1
+        df["months_closed"] = df["Prod_Closed_Date"].apply(lambda x: (self.today - x).days // 30).fillna(-1)
+
+        df = df.drop("Prod_Closed_Date", axis=1)
+
+        return df
+
+
+    def missing_values(self, df):
+        for d in ["Number_Of_Dependant", "Net_Annual_Income", "Years_At_Business"]:
+            df[d] = df[d].fillna(self.mode[d])
+
+        return df
+
 
 
 ## Tests
@@ -119,6 +165,16 @@ if __name__ == "__main__":
     print("\n### Numerical variables")
     aux = fe.cast_numerical(aux)
     print(aux.dtypes)
+
+    # Testing preprocess_datetime method
+    print("\n### Datetime variables")
+    aux = fe.preprocess_datetime(aux)
+    print(aux.head(10))
+
+    # Missing values
+    print("\n### Missing values")
+    aux = fe.missing_values(aux)
+    display(aux.describe())
 
     # Transform
     print("\n### Transform function")
