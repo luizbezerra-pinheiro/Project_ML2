@@ -114,20 +114,20 @@ class FeatEng:
             df[d] = pd.to_datetime(df[d])
 
         # Age from BirthDate
-        df["age"] = df["BirthDate"].apply(lambda x: (self.today - x).days//365)
+        df["age"] = df["BirthDate"].apply(lambda x: (self.today - x).days//365).astype('Int64')
         df = df.drop("BirthDate", axis=1)
 
         # Months from Customer_Open_Date
-        df["months_customer"] = df["Customer_Open_Date"].apply(lambda x: (self.today - x).days//30)
+        df["months_customer"] = df["Customer_Open_Date"].apply(lambda x: (self.today - x).days//30).astype('Int64')
         df = df.drop("Customer_Open_Date", axis=1)
 
         # Months from Prod_Decision_Date
-        df["months_decision"] = df["Prod_Decision_Date"].apply(lambda x: (self.today - x).days // 30)
+        df["months_decision"] = df["Prod_Decision_Date"].apply(lambda x: (self.today - x).days // 30).astype('Int64')
         df = df.drop("Prod_Decision_Date", axis=1)
 
         # Months from Prod_Closed_Date and boolean if exists Prod_Closed_Date
         df["exist_closed"] = df["Prod_Closed_Date"].notnull() * 1
-        df["months_closed"] = df["Prod_Closed_Date"].apply(lambda x: (self.today - x).days // 30).fillna(-1)
+        df["months_closed"] = df["Prod_Closed_Date"].apply(lambda x: (self.today - x).days // 30).fillna(-1).astype('Int64')
 
         df = df.drop("Prod_Closed_Date", axis=1)
 
