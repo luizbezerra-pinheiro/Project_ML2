@@ -64,7 +64,6 @@ if __name__ == "__main__":
         perf_over.append(eval_over.eval)
         eval_under = Evaluation(myModel_under, X_under, y_under, X_test, y_test, verbose=False)
         perf_under.append(eval_under.eval)
-
     perf_over = np.array(perf_over)
     perf_under = np.array(perf_under)
 
@@ -73,15 +72,16 @@ if __name__ == "__main__":
 
     print("### Cross Validation:")
     print("\t## Oversampling")
-    name_models = ["RandomForestClassifier", "LogisticRegression"]
-    for i, name in zip(range(2), name_models):
+    #name_models = ["RandomForestClassifier", "LogisticRegression"]
+    name_models = [type(m).__name__ for m in OurModel().models]
+    for i, name in enumerate(name_models):
         print("\t\t#", name)
         print("\t\t\tTrain performance:", perf_over[i,0])
         print("\t\t\tTrain f1-score:", perf_over[i,1])
         print("\t\t\tTest performance:", perf_over[i, 2])
         print("\t\t\tTest f1-score:", perf_over[i, 3])
     print("\t## Undersampling")
-    for i, name in zip(range(2), name_models):
+    for i, name in enumerate(name_models):
         print("\t\t#", name)
         print("\t\t\tTrain performance:", perf_under[i,0])
         print("\t\t\tTrain f1-score:", perf_under[i,1])
