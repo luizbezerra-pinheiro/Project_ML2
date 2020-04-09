@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from sklearn.model_selection import StratifiedKFold
+import prince
 
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
@@ -25,9 +26,10 @@ if __name__ == "__main__":
 
     # Feature Engineering of df_train
     myFE = FeatEng()
-    myFE.fit(df_train)
+    df_train = myFE.fit_transform(df_train)
+    # myFE.fit(df_train)
     # X, y, feature_names = myFE.transform(df_train)
-    df_train = myFE.transform(df_train)
+    # df_train = myFE.transform(df_train)
 
     DataAnalysis(df_train, "1_train_featEng")
 

@@ -7,6 +7,9 @@ import pandas as pd
 import numpy as np
 
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import RobustScaler
+from sklearn.decomposition import PCA
+import prince
 
 desired_width=320
 pd.set_option('display.width', desired_width)
@@ -24,14 +27,23 @@ class FeatEng:
         self.categorical_features = ['Customer_Type', 'Educational_Level', 'Marital_Status',
                                      'P_Client', 'Prod_Category', 'Prod_Sub_Category',
                                      'Source', 'Type_Of_Residence']
-        self.numerical_features = {'float64': ['Net_Annual_Income'],
-                                   'Int64': ['Number_Of_Dependant', 'Years_At_Residence',
-                                             'Years_At_Business', 'Nb_Of_Products']}
+        self.numerical_features = ['Net_Annual_Income', 'Number_Of_Dependant', 'Years_At_Residence',
+                                   'Years_At_Business', 'Nb_Of_Products']
+        # self.numerical_features = {'float64': ['Net_Annual_Income'],
+        #                            'Int64': ['Number_Of_Dependant', 'Years_At_Residence',
+        #                                      'Years_At_Business', 'Nb_Of_Products']}
         self.datetime_variables = ['BirthDate', 'Customer_Open_Date', 'Prod_Decision_Date', 'Prod_Closed_Date']
 
         # OneHotEncoder
         self.one_hot = False  # We don't have yet the encoder
         self.encoders = 0
+
+        # Scaler
+        self.scaler_Robust = 0
+
+        # Dimensionality Reduction
+        self.my_pca = None
+        self.my_mca = None
 
         # Assumption
         self.today = dt.datetime(2014, 1, 1)
@@ -41,15 +53,19 @@ class FeatEng:
                      }
 
 
-    def fit(self, df):
+    def fit_transform(self, df):
         # Mode and mean for missing values
         for d in ["Number_Of_Dependant", "Net_Annual_Income", "Years_At_Business"]:
             self.mode[d] = float(df[d].mode())
+
+        ## Não vai ser necessário fazer OneHotEncoder pois o MCA faz isso no algorithmo
 
         # Fitting OneHotEncoder
         self.encoders = OneHotEncoder(handle_unknown='ignore')
         self.encoders.fit(df[self.categorical_features])
         self.one_hot = True  # We have now the encoders
+
+        return self.transform(df)
 
 
     def transform(self, df):
@@ -60,6 +76,9 @@ class FeatEng:
         df = self.missing_values(df)
 
         df = self.filter_variables(df)
+
+        df = self.numerical_scaling(df)
+        # df = self.dimension_reduction(df)
 
         # # Data and result
         # y = np.array(df[['Y']]).reshape(-1, )
@@ -92,7 +111,8 @@ class FeatEng:
 
     def cast_numerical(self, df):
         # List of float and Int columns
-        selected_numerical_float = list(set(self.numerical_features['float64'])) + list(set(self.numerical_features['Int64']))
+        selected_numerical_float = self.numerical_features
+        # selected_numerical_float = list(set(self.numerical_features['float64'])) + list(set(self.numerical_features['Int64']))
         # selected_numerical_int = list(set(self.numerical_features['Int64']))
 
         # Float values
@@ -134,6 +154,78 @@ class FeatEng:
     def missing_values(self, df):
         for d in ["Number_Of_Dependant", "Net_Annual_Income", "Years_At_Business"]:
             df[d] = df[d].fillna(self.mode[d])
+
+        return df
+
+
+    def numerical_scaling(self, df):
+        cols = self.numerical_features
+        X_aux = np.array(df[cols])
+        feature_name = df[cols].columns
+        type_dic = dict(df[cols].dtypes)
+
+        # If scaler is 0, it means it is df_train. So we fit the scaler
+        if self.scaler_Robust == 0:
+            self.scaler_Robust = RobustScaler()
+            self.scaler_Robust.fit(X_aux)
+
+        X_aux_scaled = self.scaler_Robust.transform(X_aux)
+
+        df[feature_name] = X_aux_scaled
+        df = df.astype(type_dic)
+
+        return df
+
+
+    def dimension_reduction(self, df):
+        # ### MCA - Categorical features
+        # print("--------------------------")
+        # print(df.head())
+        # cat_cols = self.categorical_features + ["exist_closed"]
+        # print(cat_cols)
+        # df[cat_cols] = df[cat_cols].astype("category")
+        # # If my_mca is None, it means it is df_train. So we fit my_mca
+        # n_comp = 4
+        # if self.my_mca is None:
+        #     self.my_mca = prince.MCA(n_components=n_comp)
+        #     self.my_mca.fit(df[cat_cols])
+        #
+        # cols = []
+        # for i in range(n_comp):
+        #     cols += ["MCA_"+str(i+1)]
+        #
+        # print(df[cat_cols].shape)
+        # print(self.my_mca)
+        # aux_mca = self.my_mca.transform(df[cat_cols])
+        # aux_mca.columns = cols
+        # df = df.drop(cat_cols, axis=1)
+        # df = df.join(aux_mca)
+
+        ### PCA - Numerical features
+
+        # If my_pca is 0, it means it is df_train. So we fit my_pca
+        n_comp = 2
+        num_cols = self.numerical_features + ["age", "months_customer", "months_decision", "months_closed"]
+        print(num_cols)
+        if self.my_pca is None:
+            self.my_pca = PCA(n_components=n_comp)
+            self.my_pca.fit(df[num_cols])
+
+        cols = []
+        for i in range(n_comp):
+            cols += ["PCA_" + str(i + 1)]
+
+        print(df.head())
+        print(num_cols)
+        aux_pca = pd.DataFrame(self.my_pca.transform(df[num_cols]), columns=cols)
+        df = df.drop(num_cols, axis=1)
+        df = df.join(aux_pca)
+        print(self.my_pca.explained_variance_ratio_)
+        print(df.head())
+
+
+
+
 
         return df
 
