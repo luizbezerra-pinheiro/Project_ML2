@@ -4,16 +4,15 @@ from src.GetData import GetData
 from src.FeatureEngineering import FeatEng
 from src.OurModel import OurModel
 from src.Evaluation import Evaluation
+from src.DataAnalysis import DataAnalysis
+
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 import numpy as np
+import pandas as pd
 
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import f1_score
-from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import StratifiedKFold
-from sklearn.linear_model import LogisticRegression
 
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
@@ -27,9 +26,16 @@ if __name__ == "__main__":
     # Feature Engineering of df_train
     myFE = FeatEng()
     myFE.fit(df_train)
-    X, y = myFE.transform(df_train)
+    # X, y, feature_names = myFE.transform(df_train)
+    df_train = myFE.transform(df_train)
+
+    DataAnalysis(df_train, "1_train_featEng")
 
     ### ----- Cross-validation for the df_train
+    X = np.array(df_train.drop(['Y'], axis=1))
+    y = np.array(df_train[['Y']]).reshape(-1, )
+    feature_names = df_train.drop(['Y'], axis=1).columns
+
     skf = StratifiedKFold(n_splits=5)
     skf.get_n_splits(X, y)
 
@@ -64,6 +70,7 @@ if __name__ == "__main__":
         perf_over.append(eval_over.eval)
         eval_under = Evaluation(myModel_under, X_under, y_under, X_test, y_test, verbose=False)
         perf_under.append(eval_under.eval)
+
     perf_over = np.array(perf_over)
     perf_under = np.array(perf_under)
 
@@ -72,7 +79,6 @@ if __name__ == "__main__":
 
     print("### Cross Validation:")
     print("\t## Oversampling")
-    #name_models = ["RandomForestClassifier", "LogisticRegression"]
     name_models = [type(m).__name__ for m in OurModel().models]
     for i, name in enumerate(name_models):
         print("\t\t#", name)
@@ -93,72 +99,43 @@ if __name__ == "__main__":
     X_train, y_train = X, y
 
     # Oversampling and Undersampling
+    oversample = RandomOverSampler(sampling_strategy=1)
+    undersample = RandomUnderSampler(sampling_strategy=1)
+
     X_over, y_over = oversample.fit_resample(X_train, y_train)
     X_under, y_under = undersample.fit_resample(X_train, y_train)
+
+    # Data Analysis
+    aux = df_train[0:0]
+    type_dic = dict(aux.dtypes)
+    aux[feature_names] = X_over
+    aux["Y"] = y_over
+    aux = aux.astype(type_dic)
+    DataAnalysis(aux, "2_train_oversampling")
 
     # Modeling
     myModel_over = OurModel()
     myModel_over.fit(X_over, y_over)
 
+    print("TESTEEE 2\n")
+    print(myModel_over.models[0].feature_importances_)
+    plt.barh(range(X_over.shape[1]), myModel_over.models[0].feature_importances_, align='center')
+    plt.yticks(range(X_over.shape[1]), feature_names)
+    plt.xlabel("Feature importance")
+    plt.ylabel("Feature")
+    plt.show()
+
     myModel_under = OurModel()
     myModel_under.fit(X_under, y_under)
 
     # Preprocessing the test data
-    X_test, y_test = myFE.transform(df_test)
+    df_test = myFE.transform(df_test)
+
+    X_test = np.array(df_test.drop(['Y'], axis=1))
+    y_test = np.array(df_test[['Y']]).reshape(-1, )
 
     # Evaluation
     eval_over = Evaluation(myModel_over, X_over, y_over, X_test, y_test, verbose=True)
     eval_under = Evaluation(myModel_under, X_under, y_under, X_test, y_test, verbose=True)
-
-    #
-    #
-    # # Split train and test
-    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.1, random_state = 42)
-    #
-    # print('Training Features Shape:', X_train.shape)
-    # print('Training Labels Shape:', y_train.shape)
-    # print('Testing Features Shape:', X_test.shape)
-    # print('Testing Labels Shape:', y_test.shape)
-    #
-    # # Fitting the model
-    # clf = RandomForestClassifier(n_estimators=1000, random_state=0)
-    # clf2 = LogisticRegression(random_state=0)
-    #
-    # scores = cross_val_score(clf, X_train, y_train, cv=5)
-    # print(scores.mean())
-    # scores2 = cross_val_score(clf2, X_train, y_train, cv=5)
-    # print(scores2.mean())
-    #
-    # clf.fit(X_train, y_train)
-    # clf2.fit(X_train, y_train)
-    #
-    # # Predict
-    # y_pred = clf.predict(X_test)
-    # y_train_pred = clf.predict(X_train)
-    #
-    # y_pred2 = clf2.predict(X_test)
-    # y_train_pred2 = clf2.predict(X_train)
-    #
-    #
-    # # Performance
-    # #print(confusion_matrix(y_test, y_pred))
-    # tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-    # print("\nRandomForest:\nTest\n\tPerformance test:", (tp-fp)/(tp+fn))
-    # print("\tf1-score: ", f1_score(y_test, y_pred))
-    #
-    # #print(confusion_matrix(y_train, y_train_pred))
-    # tn, fp, fn, tp = confusion_matrix(y_train, y_train_pred).ravel()
-    # print("\nTrain\n\tPerformance train:", (tp - fp) / (tp + fn))
-    # print("\tf1-score: ", f1_score(y_train, y_train_pred))
-    #
-    # #print(confusion_matrix(y_test, y_pred2))
-    # tn, fp, fn, tp = confusion_matrix(y_test, y_pred2).ravel()
-    # print("\nLogisticRegression:\nTest\n\tPerformance:", (tp - fp) / (tp + fn))
-    # print("\tf1-score: ", f1_score(y_test, y_pred2))
-    #
-    # #print(confusion_matrix(y_train, y_train_pred2))
-    # tn, fp, fn, tp = confusion_matrix(y_train, y_train_pred2).ravel()
-    # print("\nTrain\n\tPerformance train:", (tp - fp) / (tp + fn))
-    # print("\tf1-score: ", f1_score(y_train, y_train_pred2))
 
 

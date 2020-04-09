@@ -19,12 +19,7 @@ Class responsible for preprocessing our Data
 
 
 class FeatEng:
-    def __init__(self, selected_feat=False):
-        # Selected Variables
-        self.selected_feat = selected_feat
-        self.selected_features = ["Y", "Net_Annual_Income", "Years_At_Business",
-                                  "Years_At_Residence", "Number_Of_Dependant"]
-
+    def __init__(self):
         # Type of Variables
         self.categorical_features = ['Customer_Type', 'Educational_Level', 'Marital_Status',
                                      'P_Client', 'Prod_Category', 'Prod_Sub_Category',
@@ -64,19 +59,20 @@ class FeatEng:
         df = self.preprocess_datetime(df)
         df = self.missing_values(df)
 
-        # select columns, if in case
-        if self.selected_feat:
-            df = self.filter_variables(df)
+        df = self.filter_variables(df)
 
-        # Data and result
-        y = np.array(df[['Y']]).reshape(-1, )
-        X = np.array(df.drop(['Y'], axis=1))
+        # # Data and result
+        # y = np.array(df[['Y']]).reshape(-1, )
+        # X = np.array(df.drop(['Y'], axis=1))
+        #
+        # return X, y, df.drop(['Y'], axis=1).columns
 
-        return X, y
+        return df
 
 
     def filter_variables(self, df):
-        return df[self.selected_features].fillna(0)
+        drop_variables = ["Id_Customer"]
+        return df.drop(drop_variables, axis=1)
 
 
     def convert_categorical(self, df):
@@ -84,8 +80,9 @@ class FeatEng:
         if self.one_hot is False:
             raise Exception("There is no Label Encoder fitted.")
 
-        aux = pd.DataFrame(self.encoders.transform(df[self.categorical_features]).toarray(),
-                           columns=self.encoders.get_feature_names(self.categorical_features))
+        cols = self.encoders.get_feature_names(self.categorical_features)
+        aux = pd.DataFrame(self.encoders.transform(df[self.categorical_features]).toarray(), columns=cols)
+        aux[cols] = aux[cols].astype('category')
 
         df = df.drop(self.categorical_features, axis=1)
         df = df.join(aux)
@@ -95,15 +92,15 @@ class FeatEng:
 
     def cast_numerical(self, df):
         # List of float and Int columns
-        selected_numerical_float = list(set(self.numerical_features['float64']))
-        selected_numerical_int = list(set(self.numerical_features['Int64'])) + list(self.encoders.get_feature_names(self.categorical_features))
+        selected_numerical_float = list(set(self.numerical_features['float64'])) + list(set(self.numerical_features['Int64']))
+        # selected_numerical_int = list(set(self.numerical_features['Int64']))
 
         # Float values
         df[selected_numerical_float] = df[selected_numerical_float].astype('float64')
 
         # Integer values
         # Int allows NaN values (int doesn't allow it)
-        df[selected_numerical_int] = df[selected_numerical_int].astype('Int64')
+        # df[selected_numerical_int] = df[selected_numerical_int].astype('Int64')
 
         return df
 
@@ -114,20 +111,20 @@ class FeatEng:
             df[d] = pd.to_datetime(df[d])
 
         # Age from BirthDate
-        df["age"] = df["BirthDate"].apply(lambda x: (self.today - x).days//365).astype('Int64')
+        df["age"] = df["BirthDate"].apply(lambda x: (self.today - x).days/365).astype('float64')
         df = df.drop("BirthDate", axis=1)
 
         # Months from Customer_Open_Date
-        df["months_customer"] = df["Customer_Open_Date"].apply(lambda x: (self.today - x).days//30).astype('Int64')
+        df["months_customer"] = df["Customer_Open_Date"].apply(lambda x: (self.today - x).days/30).astype('float64')
         df = df.drop("Customer_Open_Date", axis=1)
 
         # Months from Prod_Decision_Date
-        df["months_decision"] = df["Prod_Decision_Date"].apply(lambda x: (self.today - x).days // 30).astype('Int64')
+        df["months_decision"] = df["Prod_Decision_Date"].apply(lambda x: (self.today - x).days / 30).astype("float64")
         df = df.drop("Prod_Decision_Date", axis=1)
 
         # Months from Prod_Closed_Date and boolean if exists Prod_Closed_Date
-        df["exist_closed"] = df["Prod_Closed_Date"].notnull() * 1
-        df["months_closed"] = df["Prod_Closed_Date"].apply(lambda x: (self.today - x).days // 30).fillna(-1).astype('Int64')
+        df["exist_closed"] = (df["Prod_Closed_Date"].notnull() * 1).astype("category")
+        df["months_closed"] = df["Prod_Closed_Date"].apply(lambda x: (self.today - x).days / 30).fillna(-1).astype('float64')
 
         df = df.drop("Prod_Closed_Date", axis=1)
 
