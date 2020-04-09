@@ -8,10 +8,9 @@ import numpy as np
 
 from sklearn.preprocessing import OneHotEncoder
 
-desired_width=320
+desired_width = 320
 pd.set_option('display.width', desired_width)
 pd.set_option('display.max_columns', 100)
-
 
 """
 Class responsible for preprocessing our Data
@@ -24,11 +23,9 @@ class FeatEng:
         self.categorical_features = ['Customer_Type', 'Educational_Level', 'Marital_Status',
                                      'P_Client', 'Prod_Category', 'Prod_Sub_Category',
                                      'Source', 'Type_Of_Residence']
-        self.numerical_features = {'float64': ['Net_Annual_Income'],
-                                   'Int64': ['Number_Of_Dependant', 'Years_At_Residence',
-                                             'Years_At_Business', 'Nb_Of_Products']}
+        self.numerical_features = ['Net_Annual_Income', 'Number_Of_Dependant', 'Years_At_Residence',
+                                   'Years_At_Business', 'Nb_Of_Products']
         self.datetime_variables = ['BirthDate', 'Customer_Open_Date', 'Prod_Decision_Date', 'Prod_Closed_Date']
-
         # OneHotEncoder
         self.one_hot = False  # We don't have yet the encoder
         self.encoders = 0
@@ -40,7 +37,6 @@ class FeatEng:
                      "Years_At_Business": -1
                      }
 
-
     def fit(self, df):
         # Mode and mean for missing values
         for d in ["Number_Of_Dependant", "Net_Annual_Income", "Years_At_Business"]:
@@ -51,7 +47,6 @@ class FeatEng:
         self.encoders.fit(df[self.categorical_features])
         self.one_hot = True  # We have now the encoders
 
-
     def transform(self, df):
         # Treating categorical and numerical variables
         df = self.convert_categorical(df)
@@ -61,19 +56,11 @@ class FeatEng:
 
         df = self.filter_variables(df)
 
-        # # Data and result
-        # y = np.array(df[['Y']]).reshape(-1, )
-        # X = np.array(df.drop(['Y'], axis=1))
-        #
-        # return X, y, df.drop(['Y'], axis=1).columns
-
         return df
-
 
     def filter_variables(self, df):
         drop_variables = ["Id_Customer"]
         return df.drop(drop_variables, axis=1)
-
 
     def convert_categorical(self, df):
         # Use LabelEncoder from sklearn to convert the categorical variables into numerical
@@ -89,21 +76,10 @@ class FeatEng:
 
         return df
 
-
     def cast_numerical(self, df):
-        # List of float and Int columns
-        selected_numerical_float = list(set(self.numerical_features['float64'])) + list(set(self.numerical_features['Int64']))
-        # selected_numerical_int = list(set(self.numerical_features['Int64']))
 
-        # Float values
-        df[selected_numerical_float] = df[selected_numerical_float].astype('float64')
-
-        # Integer values
-        # Int allows NaN values (int doesn't allow it)
-        # df[selected_numerical_int] = df[selected_numerical_int].astype('Int64')
-
+        df[self.numerical_features] = df[self.numerical_features].astype('float64')
         return df
-
 
     def preprocess_datetime(self, df):
         # Changing the type of the column
@@ -111,11 +87,11 @@ class FeatEng:
             df[d] = pd.to_datetime(df[d])
 
         # Age from BirthDate
-        df["age"] = df["BirthDate"].apply(lambda x: (self.today - x).days/365).astype('float64')
+        df["age"] = df["BirthDate"].apply(lambda x: (self.today - x).days / 365).astype('float64')
         df = df.drop("BirthDate", axis=1)
 
         # Months from Customer_Open_Date
-        df["months_customer"] = df["Customer_Open_Date"].apply(lambda x: (self.today - x).days/30).astype('float64')
+        df["months_customer"] = df["Customer_Open_Date"].apply(lambda x: (self.today - x).days / 30).astype('float64')
         df = df.drop("Customer_Open_Date", axis=1)
 
         # Months from Prod_Decision_Date
@@ -124,19 +100,18 @@ class FeatEng:
 
         # Months from Prod_Closed_Date and boolean if exists Prod_Closed_Date
         df["exist_closed"] = (df["Prod_Closed_Date"].notnull() * 1).astype("category")
-        df["months_closed"] = df["Prod_Closed_Date"].apply(lambda x: (self.today - x).days / 30).fillna(-1).astype('float64')
+        df["months_closed"] = df["Prod_Closed_Date"].apply(lambda x: (self.today - x).days / 30).fillna(-1).astype(
+            'float64')
 
         df = df.drop("Prod_Closed_Date", axis=1)
 
         return df
-
 
     def missing_values(self, df):
         for d in ["Number_Of_Dependant", "Net_Annual_Income", "Years_At_Business"]:
             df[d] = df[d].fillna(self.mode[d])
 
         return df
-
 
 
 ## Tests
@@ -175,12 +150,14 @@ if __name__ == "__main__":
 
     # Transform
     print("\n### Transform function")
-    X_train, y_train = fe.transform(df_train)
+    df_train = fe.transform(df_train)
+    X_train = np.array(df_train.drop(['Y'], axis=1))
+    y_train = np.array(df_train[['Y']]).reshape(-1, )
     print("X_train shape:", X_train.shape)
     print("y_train shape:", y_train.shape)
-    X_test, y_test = fe.transform(df_test)
+    df_test = fe.transform(df_test)
+    X_test, y_test =  np.array(df_test.drop(['Y'], axis=1)), np.array(df_test[['Y']]).reshape(-1, )
     print("X_test shape:", X_test.shape)
     print("y_test shape:", y_test.shape)
-
 
     # fe.df.to_csv('../data/Credit_FeatEng.csv', index=False)
