@@ -1,6 +1,5 @@
 .idea
 data
-data_analysis
 src/.ipynb_checkpoints
 src/__pycache__
 venv
