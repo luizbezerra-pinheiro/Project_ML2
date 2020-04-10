@@ -43,7 +43,7 @@ if __name__ == "__main__":
     perf_under = []
     # For each split
     # i = 1
-    for train_index, test_index in tqdm(skf.split(X, y)):
+    for train_index, test_index in skf.split(X, y):
         # print("\n###", i, "\n")
         # i += 1
 
