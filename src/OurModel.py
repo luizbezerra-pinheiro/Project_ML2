@@ -9,7 +9,7 @@ class OurModel:
         self.params = params
         self.models = [
             RandomForestClassifier(**params[0]),  # n_estimators=500, random_state=0,
-            LogisticRegression(random_state=0, max_iter=1000, **params[1]),
+            LogisticRegression(random_state=0, **params[1]),
             NeuralClassifier(**params[2])  # epochs=100, batch_size=16,
         ]
         self.params_to_tune = [
@@ -19,7 +19,7 @@ class OurModel:
              'min_samples_split': [2, 5, 10],  # Minimum number of samples required to split a node
              'min_samples_leaf': [1, 2, 4],  # Minimum number of samples required at each leaf node
              'bootstrap': [True, False]},    # Create the random grid
-            {},
+            {'max_iter': [1000, 2000, 2500]},
             {'epochs': [int(x) for x in np.linspace(10, 110, num=11)],
              'batch_size': [8, 16, 32, 64],
              'optimizer': ['adam', 'sgd']}

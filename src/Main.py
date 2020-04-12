@@ -12,6 +12,7 @@ import seaborn as sns
 
 import numpy as np
 import pandas as pd
+import json
 
 
 from sklearn.model_selection import StratifiedKFold
@@ -34,27 +35,25 @@ if __name__ == "__main__":
     DataAnalysis(df_train, "1_train_featEng")
 
     ### ----- Hyperparameter Tuning -------- ###
-    tuning = True
+    tuning = False
     if tuning:
         myModel = OurModel()
         models_tune = TuningHyperparameters(myModel.models, myModel.params_to_tune)
         models_tune.fit(X, y)
         print(models_tune.get_best_params())
         choosen_params = models_tune.get_best_params()
+        with open('hyperparameters.json', 'w') as f:
+            json.dump(choosen_params, f)
     else:
-        choosen_params = [{'n_estimators': 800, 'min_samples_split': 5, 'min_samples_leaf': 1, 'max_features': 'sqrt',
-                           'max_depth': 100, 'bootstrap': False},
-                          {},
-                          {'epochs': 50,
-                           'batch_size': 32,
-                           'optimizer': 'adam'}
-                          ]
-
+        with open('hyperparameters.json', 'r') as f:
+            choosen_params = json.load(f)
+    print(choosen_params)
     ### ----- Cross-validation for the df_train
     skf = StratifiedKFold(n_splits=5)
 
     perf_over = []
     perf_under = []
+    perf_direct = []
     # For each split
     for train_index, test_index in tqdm(skf.split(X, y)):
         df_train_cv = df_train.iloc[train_index].reset_index(drop=True)
@@ -85,34 +84,48 @@ if __name__ == "__main__":
         myModel_under = OurModel(choosen_params)
         myModel_under.fit(X_under, y_under)
 
+        myModel = OurModel(choosen_params)
+        myModel.fit(X_train, y_train)
+
         # Evaluation of the models
         eval_over = Evaluation(myModel_over, X_over, y_over, X_test, y_test, verbose=False)
         perf_over.append(eval_over.eval)
         eval_under = Evaluation(myModel_under, X_under, y_under, X_test, y_test, verbose=False)
         perf_under.append(eval_under.eval)
+        eval_direct = Evaluation(myModel, X_train, y_train, X_test, y_test, verbose=False)
+        perf_direct.append(eval_direct.eval)
 
     perf_over = np.array(perf_over)
     perf_under = np.array(perf_under)
+    perf_direct = np.array(perf_direct)
 
     perf_over = perf_over.mean(axis=0)
     perf_under = perf_under.mean(axis=0)
+    perf_direct = perf_direct.mean(axis=0)
 
     print("### Cross Validation:")
     print("\t## Oversampling")
     name_models = [type(m).__name__ for m in OurModel().models]
     for i, name in enumerate(name_models):
         print("\t\t#", name)
-        print("\t\t\tTrain performance:", perf_over[i,0])
-        print("\t\t\tTrain f1-score:", perf_over[i,1])
+        print("\t\t\tTrain performance:", perf_over[i, 0])
+        print("\t\t\tTrain f1-score:", perf_over[i, 1])
         print("\t\t\tTest performance:", perf_over[i, 2])
         print("\t\t\tTest f1-score:", perf_over[i, 3])
     print("\t## Undersampling")
     for i, name in enumerate(name_models):
         print("\t\t#", name)
-        print("\t\t\tTrain performance:", perf_under[i,0])
-        print("\t\t\tTrain f1-score:", perf_under[i,1])
+        print("\t\t\tTrain performance:", perf_under[i, 0])
+        print("\t\t\tTrain f1-score:", perf_under[i, 1])
         print("\t\t\tTest performance:", perf_under[i, 2])
         print("\t\t\tTest f1-score:", perf_under[i, 3], "\n")
+    print("\t## Direct")
+    for i, name in enumerate(name_models):
+        print("\t\t#", name)
+        print("\t\t\tTrain performance:", perf_direct[i, 0])
+        print("\t\t\tTrain f1-score:", perf_direct[i, 1])
+        print("\t\t\tTest performance:", perf_direct[i, 2])
+        print("\t\t\tTest f1-score:", perf_direct[i, 3], "\n")
 
     # Modeling
 
@@ -157,6 +170,9 @@ if __name__ == "__main__":
     myModel_under = OurModel(choosen_params)
     myModel_under.fit(X_under, y_under)
 
+    myModel = OurModel(choosen_params)
+    myModel.fit(X_train, y_train)
+
     # Preprocessing the test data
     df_test = myFE.transform(df_test)
 
@@ -166,3 +182,4 @@ if __name__ == "__main__":
     # Evaluation
     eval_over = Evaluation(myModel_over, X_over, y_over, X_test, y_test, verbose=True)
     eval_under = Evaluation(myModel_under, X_under, y_under, X_test, y_test, verbose=True)
+    eval_direct = Evaluation(myModel, X_train, y_train, X_test, y_test, verbose=True)
