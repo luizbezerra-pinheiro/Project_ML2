@@ -1,21 +1,32 @@
 from sklearn.model_selection import RandomizedSearchCV
-from sklearn.ensemble import RandomForestRegressor
-from pprint import pprint# Look at parameters used by our current forest
-import numpy as np
+from sklearn.metrics import confusion_matrix, make_scorer
+
+
+def my_custom_loss_func(y_true, y_pred):
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+    return (tp - fp) / (tp + fn)
+
+
+perf_scorer = make_scorer(my_custom_loss_func, greater_is_better=True)
+
 
 class TuningHyperparameters:
 
-    def __init__(self, models, params):
+    def __init__(self, models, params, verbose=True):
         self.models = models
         self.params = params
         self.models_rand = []
+        self.verbose=verbose
         for model, grid in zip(self.models, self.params):
-            self.models_rand.append(RandomizedSearchCV(estimator=model, param_distributions=grid, n_iter=100, cv=5, verbose=2,
-                                                       random_state=42, n_jobs=-1))
+            self.models_rand.append(
+                RandomizedSearchCV(estimator=model, param_distributions=grid, scoring=perf_scorer, n_iter=100, cv=3, verbose=2,
+                                   random_state=42, n_jobs=-1))
 
     def fit(self, X, y):
         for model_rand in self.models_rand:
             model_rand.fit(X, y)
+            if self.verbose:
+                print(f'Best score: {model_rand.best_score_}')
 
     def transform(self):
         best_models = []
@@ -30,35 +41,9 @@ class TuningHyperparameters:
     def get_best_params(self):
         best_params = []
         for model_rand in self.models_rand:
-           best_params.append(model_rand.best_params_)
+            best_params.append(model_rand.best_params_)
         return best_params
 
 
 if __name__ == '__main__':
-    rf = RandomForestRegressor()
-
-    # Number of trees in random forest
-    n_estimators = [int(x) for x in np.linspace(start=200, stop=2000, num=10)]
-    # Number of features to consider at every split
-    max_features = ['auto', 'sqrt']
-    # Maximum number of levels in tree
-    max_depth = [int(x) for x in np.linspace(10, 110, num=11)]
-    max_depth.append(None)
-    # Minimum number of samples required to split a node
-    min_samples_split = [2, 5, 10]
-    # Minimum number of samples required at each leaf node
-    min_samples_leaf = [1, 2, 4]
-    # Method of selecting samples for training each tree
-    bootstrap = [True, False]  # Create the random grid
-    random_grid = {'n_estimators': n_estimators,
-                   'max_features': max_features,
-                   'max_depth': max_depth,
-                   'min_samples_split': min_samples_split,
-                   'min_samples_leaf': min_samples_leaf,
-                   'bootstrap': bootstrap}
-
-    rf_rand = TuningHyperparameters([rf], [random_grid])
-
-   # best_rf_rand = rf_rand.fit_transform()
-
     exit()
