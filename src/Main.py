@@ -5,6 +5,7 @@ from src.FeatureEngineering import FeatEng
 from src.OurModel import OurModel
 from src.Evaluation import Evaluation
 from src.DataAnalysis import DataAnalysis
+from src.TuningHyperparameters import TuningHyperparameters
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -28,7 +29,28 @@ if __name__ == "__main__":
     ### ----- Cross-validation for the df_train
     X = np.array(df_train.drop(['Y'], axis=1))
     y = np.array(df_train[['Y']]).reshape(-1, )
+    feature_names = df_train.drop(['Y'], axis=1).columns
 
+    DataAnalysis(df_train, "1_train_featEng")
+
+    ### ----- Hyperparameter Tuning -------- ###
+    tuning = True
+    if tuning:
+        myModel = OurModel()
+        models_tune = TuningHyperparameters(myModel.models, myModel.params_to_tune)
+        models_tune.fit(X, y)
+        print(models_tune.get_best_params())
+        choosen_params = models_tune.get_best_params()
+    else:
+        choosen_params = [{'n_estimators': 800, 'min_samples_split': 5, 'min_samples_leaf': 1, 'max_features': 'sqrt',
+                           'max_depth': 100, 'bootstrap': False},
+                          {},
+                          {'epochs': 50,
+                           'batch_size': 32,
+                           'optimizer': 'adam'}
+                          ]
+
+    ### ----- Cross-validation for the df_train
     skf = StratifiedKFold(n_splits=5)
 
     perf_over = []
@@ -57,13 +79,13 @@ if __name__ == "__main__":
         X_under, y_under = undersample.fit_resample(X_train, y_train)
 
         # Modeling
-        myModel_over = OurModel()
+        myModel_over = OurModel(choosen_params)
         myModel_over.fit(X_over, y_over)
 
-        myModel_under = OurModel()
+        myModel_under = OurModel(choosen_params)
         myModel_under.fit(X_under, y_under)
 
-        #Evaluation of the models
+        # Evaluation of the models
         eval_over = Evaluation(myModel_over, X_over, y_over, X_test, y_test, verbose=False)
         perf_over.append(eval_over.eval)
         eval_under = Evaluation(myModel_under, X_under, y_under, X_test, y_test, verbose=False)
@@ -91,7 +113,6 @@ if __name__ == "__main__":
         print("\t\t\tTrain f1-score:", perf_under[i,1])
         print("\t\t\tTest performance:", perf_under[i, 2])
         print("\t\t\tTest f1-score:", perf_under[i, 3], "\n")
-
 
     # Modeling
 
@@ -122,7 +143,7 @@ if __name__ == "__main__":
     DataAnalysis(aux, "2_train_oversampling")
 
     # Modeling
-    myModel_over = OurModel()
+    myModel_over = OurModel(choosen_params)
     myModel_over.fit(X_over, y_over)
 
     print("TESTEEE 2\n")
@@ -133,7 +154,7 @@ if __name__ == "__main__":
     plt.ylabel("Feature")
     plt.show()
 
-    myModel_under = OurModel()
+    myModel_under = OurModel(choosen_params)
     myModel_under.fit(X_under, y_under)
 
     # Preprocessing the test data
@@ -145,5 +166,3 @@ if __name__ == "__main__":
     # Evaluation
     eval_over = Evaluation(myModel_over, X_over, y_over, X_test, y_test, verbose=True)
     eval_under = Evaluation(myModel_under, X_under, y_under, X_test, y_test, verbose=True)
-
-
