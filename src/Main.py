@@ -12,7 +12,9 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 
+
 from sklearn.model_selection import StratifiedKFold
+import prince
 
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
@@ -23,32 +25,28 @@ if __name__ == "__main__":
     # Get data
     df_train, df_test = GetData().get()
 
-    # Feature Engineering of df_train
-    myFE = FeatEng()
-    myFE.fit(df_train)
-    # X, y, feature_names = myFE.transform(df_train)
-    df_train = myFE.transform(df_train)
-
-    DataAnalysis(df_train, "1_train_featEng")
-
     ### ----- Cross-validation for the df_train
     X = np.array(df_train.drop(['Y'], axis=1))
     y = np.array(df_train[['Y']]).reshape(-1, )
-    feature_names = df_train.drop(['Y'], axis=1).columns
 
     skf = StratifiedKFold(n_splits=5)
-    skf.get_n_splits(X, y)
 
     perf_over = []
     perf_under = []
     # For each split
-    # i = 1
-    for train_index, test_index in skf.split(X, y):
-        # print("\n###", i, "\n")
-        # i += 1
+    for train_index, test_index in tqdm(skf.split(X, y)):
+        df_train_cv = df_train.iloc[train_index].reset_index(drop=True)
+        df_test_cv = df_train.iloc[test_index].reset_index(drop=True)
 
-        X_train, y_train = X[train_index], y[train_index]
-        X_test, y_test = X[test_index], y[test_index]
+        # FeatEng
+        myFE = FeatEng()
+        df_train_cv = myFE.fit_transform(df_train_cv)
+        df_test_cv = myFE.transform(df_test_cv)
+
+        # print(df_train_cv.describe(include='all'))
+
+        X_train, y_train = np.array(df_train_cv.drop(['Y'], axis=1)), np.array(df_train_cv["Y"])
+        X_test, y_test = np.array(df_test_cv.drop(['Y'], axis=1)), np.array(df_test_cv["Y"])
 
         # Treating the imbalanced data
         # Oversampling and Undersampling
@@ -96,7 +94,16 @@ if __name__ == "__main__":
 
 
     # Modeling
-    X_train, y_train = X, y
+
+    # Feature Engineering of df_train
+    myFE = FeatEng()
+    df_train = myFE.fit_transform(df_train)
+
+    # Analysis of the Data Train
+    DataAnalysis(df_train, "1_train_featEng")
+
+    X_train = np.array(df_train.drop(['Y'], axis=1))
+    y_train = np.array(df_train[['Y']]).reshape(-1, )
 
     # Oversampling and Undersampling
     oversample = RandomOverSampler(sampling_strategy=1)
@@ -107,6 +114,7 @@ if __name__ == "__main__":
 
     # Data Analysis
     aux = df_train[0:0]
+    feature_names = [c for c in df_train.columns if c != "Y"]
     type_dic = dict(aux.dtypes)
     aux[feature_names] = X_over
     aux["Y"] = y_over
