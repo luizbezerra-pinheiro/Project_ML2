@@ -6,7 +6,7 @@ class OurModel:
     def __init__(self):
         self.models = [
             RandomForestClassifier(n_estimators=500, random_state=0),
-            LogisticRegression(random_state=0, max_iter=1000)
+            # LogisticRegression(random_state=0, max_iter=1000)
         ]
 
     def fit(self, X_train, y_train):

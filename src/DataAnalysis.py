@@ -9,7 +9,6 @@ class DataAnalysis:
         self.df = df
 
         # Methods
-        print("1111111111")
         self.categorical_analysis()
         self.numerical_analysis()
 
