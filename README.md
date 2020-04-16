@@ -58,7 +58,9 @@ ROC) as a performance measure. AUC is a good metric for imbalanced classificatio
 ### What is the minimum performance?
 
 *First method:* The minimum performance can be bellow zero, which means that we can lose money, but it depends on the total of positives and the number of individuals of the dataset. The minimum is reached if the model predicts all negatives as positives:
-(P-TOTAL)/P
+
+(P-TOTAL) / P
+
 And the maximum value we can obtain is 1, which means that we obtained the maximum profit possible, considering that we apply a fixed interest rate. It is reached when the model has no FN and no FP, it means that the model has correctly classified all individuals.
 
 *Second method :* Predicting randomly always produces an AUC
