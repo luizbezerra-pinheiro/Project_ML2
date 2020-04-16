@@ -65,3 +65,25 @@ And the maximum value we can obtain is 1, which means that we obtained the maxim
 
 *Second method :* Predicting randomly always produces an AUC
 of 0.5, no matter how imbalanced the classes in a dataset are.
+
+
+## Our Resolution
+To solve this problem we followed a classical approach: 
+
+1) We studied the problem proposed
+2) We studied the given data performing analysis to understand and compare the relevance of the features
+3) We did the feature engineering to prepare the data to be modelized
+4) We choose some models, we tunned theirs parameters and we compared their performance using our metric
+
+### Feature Engineering
+
+
+### The Models
+
+As it is a binary classification problem, we choose three of the most classical approaches:
+1) RandomForestClassifier
+2) LogisticRegressor
+3) NeuralClassifier
+
+
+### Results
