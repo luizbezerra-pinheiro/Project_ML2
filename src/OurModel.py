@@ -5,7 +5,9 @@ import numpy as np
 
 
 class OurModel:
-    def __init__(self, params=[{}, {}, {}]):
+    def __init__(self, params=None):
+        if params is None:
+            params = [{"n_estimators": 400}, {}, {"epochs": 100, "batch_size": 16}]
         self.params = params
         self.models = [
             RandomForestClassifier(**params[0]),  # n_estimators=500, random_state=0,

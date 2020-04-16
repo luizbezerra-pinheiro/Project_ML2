@@ -35,19 +35,21 @@ if __name__ == "__main__":
     DataAnalysis(df_train, "1_train_featEng")
 
     ### ----- Hyperparameter Tuning -------- ###
-    tuning = False
-    if tuning:
-        myModel = OurModel()
-        models_tune = TuningHyperparameters(myModel.models, myModel.params_to_tune)
-        models_tune.fit(X, y)
-        print(models_tune.get_best_params())
-        choosen_params = models_tune.get_best_params()
-        with open('hyperparameters.json', 'w') as f:
-            json.dump(choosen_params, f)
-    else:
-        with open('hyperparameters.json', 'r') as f:
-            choosen_params = json.load(f)
-    print(choosen_params)
+    try:
+        with open('hyperparameters_direct.json', 'r') as f:
+            choosen_params_direct = json.load(f)
+    except FileNotFoundError:
+        choosen_params_direct = None
+    try:
+        with open('hyperparameters_over.json', 'r') as f:
+            choosen_params_over = json.load(f)
+    except FileNotFoundError:
+        choosen_params_over = None
+    try:
+        with open('hyperparameters_under.json', 'r') as f:
+            choosen_params_under = json.load(f)
+    except FileNotFoundError:
+        choosen_params_under = None
     ### ----- Cross-validation for the df_train
     skf = StratifiedKFold(n_splits=5)
 
@@ -78,21 +80,21 @@ if __name__ == "__main__":
         X_under, y_under = undersample.fit_resample(X_train, y_train)
 
         # Modeling
-        myModel_over = OurModel(choosen_params)
+        myModel_over = OurModel(choosen_params_over)
         myModel_over.fit(X_over, y_over)
 
-        myModel_under = OurModel(choosen_params)
+        myModel_under = OurModel(choosen_params_under)
         myModel_under.fit(X_under, y_under)
 
-        myModel = OurModel(choosen_params)
-        myModel.fit(X_train, y_train)
+        myModel_direct = OurModel(choosen_params_direct)
+        myModel_direct.fit(X_train, y_train)
 
         # Evaluation of the models
         eval_over = Evaluation(myModel_over, X_over, y_over, X_test, y_test, verbose=False)
         perf_over.append(eval_over.eval)
         eval_under = Evaluation(myModel_under, X_under, y_under, X_test, y_test, verbose=False)
         perf_under.append(eval_under.eval)
-        eval_direct = Evaluation(myModel, X_train, y_train, X_test, y_test, verbose=False)
+        eval_direct = Evaluation(myModel_direct, X_train, y_train, X_test, y_test, verbose=False)
         perf_direct.append(eval_direct.eval)
 
     perf_over = np.array(perf_over)
@@ -156,7 +158,7 @@ if __name__ == "__main__":
     DataAnalysis(aux, "2_train_oversampling")
 
     # Modeling
-    myModel_over = OurModel(choosen_params)
+    myModel_over = OurModel(choosen_params_over)
     myModel_over.fit(X_over, y_over)
 
     print("TESTEEE 2\n")
@@ -167,11 +169,11 @@ if __name__ == "__main__":
     plt.ylabel("Feature")
     plt.show()
 
-    myModel_under = OurModel(choosen_params)
+    myModel_under = OurModel(choosen_params_under)
     myModel_under.fit(X_under, y_under)
 
-    myModel = OurModel(choosen_params)
-    myModel.fit(X_train, y_train)
+    myModel_direct = OurModel(choosen_params_direct)
+    myModel_direct.fit(X_train, y_train)
 
     # Preprocessing the test data
     df_test = myFE.transform(df_test)
@@ -182,4 +184,4 @@ if __name__ == "__main__":
     # Evaluation
     eval_over = Evaluation(myModel_over, X_over, y_over, X_test, y_test, verbose=True)
     eval_under = Evaluation(myModel_under, X_under, y_under, X_test, y_test, verbose=True)
-    eval_direct = Evaluation(myModel, X_train, y_train, X_test, y_test, verbose=True)
+    eval_direct = Evaluation(myModel_direct, X_train, y_train, X_test, y_test, verbose=True)
