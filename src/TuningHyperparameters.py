@@ -6,6 +6,7 @@ from src.FeatureEngineering import FeatEng
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
 import numpy as np
+import os
 import json
 
 
@@ -26,7 +27,7 @@ class TuningHyperparameters:
         self.verbose=verbose
         for model, grid in zip(self.models, self.params):
             self.models_rand.append(
-                RandomizedSearchCV(estimator=model, param_distributions=grid, scoring=perf_scorer, n_iter=100, cv=3, verbose=2,
+                RandomizedSearchCV(estimator=model, param_distributions=grid, scoring=perf_scorer, n_iter=100, cv=5, verbose=2,
                                    random_state=42, n_jobs=-1))
 
     def fit(self, X, y):
@@ -72,13 +73,14 @@ if __name__ == '__main__':
     X_under, y_under = undersample.fit_resample(X_train, y_train)
 
     # Hyperparameter tuning
+    params_dir = os.path.join(os.path.dirname(os.getcwd()), "params")
     # Direct
     myModel = OurModel()
     models_tune = TuningHyperparameters(myModel.models, myModel.params_to_tune)
     models_tune.fit(X_train, y_train)
     print(models_tune.get_best_params())
     choosen_params = models_tune.get_best_params()
-    with open('hyperparameters_direct.json', 'w') as f:
+    with open(os.path.join(params_dir, 'hyperparameters_direct.json'), 'w') as f:
         json.dump(choosen_params, f)
 
     # Oversampling
@@ -87,7 +89,7 @@ if __name__ == '__main__':
     models_tune.fit(X_over, y_over)
     print(models_tune.get_best_params())
     choosen_params = models_tune.get_best_params()
-    with open('hyperparameters_over.json', 'w') as f:
+    with open(os.path.join(params_dir, 'hyperparameters_over.json'), 'w') as f:
         json.dump(choosen_params, f)
 
     # Undersampling
@@ -96,6 +98,6 @@ if __name__ == '__main__':
     models_tune.fit(X_under, y_under)
     print(models_tune.get_best_params())
     choosen_params = models_tune.get_best_params()
-    with open('hyperparameters_under.json', 'w') as f:
+    with open(os.path.join(params_dir, 'hyperparameters_under.json'), 'w') as f:
         json.dump(choosen_params, f)
 

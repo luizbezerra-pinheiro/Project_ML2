@@ -2,9 +2,10 @@ from keras.models import Sequential
 from keras.layers import Dense
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.base import BaseEstimator
 
 
-class NeuralClassifier:
+class NeuralClassifier(BaseEstimator):
     def __init__(self, epochs=10, batch_size=10, verbose=2, optimizer='adam'):
         super(NeuralClassifier, self).__init__()
         self.input_dim = None

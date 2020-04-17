@@ -32,24 +32,8 @@ if __name__ == "__main__":
     y = np.array(df_train[['Y']]).reshape(-1, )
     feature_names = df_train.drop(['Y'], axis=1).columns
 
-    DataAnalysis(df_train, "1_train_featEng")
+    #DataAnalysis(df_train, "1_train_featEng")
 
-    ### ----- Hyperparameter Tuning -------- ###
-    try:
-        with open('hyperparameters_direct.json', 'r') as f:
-            choosen_params_direct = json.load(f)
-    except FileNotFoundError:
-        choosen_params_direct = None
-    try:
-        with open('hyperparameters_over.json', 'r') as f:
-            choosen_params_over = json.load(f)
-    except FileNotFoundError:
-        choosen_params_over = None
-    try:
-        with open('hyperparameters_under.json', 'r') as f:
-            choosen_params_under = json.load(f)
-    except FileNotFoundError:
-        choosen_params_under = None
     ### ----- Cross-validation for the df_train
     skf = StratifiedKFold(n_splits=5)
 
@@ -80,13 +64,13 @@ if __name__ == "__main__":
         X_under, y_under = undersample.fit_resample(X_train, y_train)
 
         # Modeling
-        myModel_over = OurModel(choosen_params_over)
+        myModel_over = OurModel(sampling_mode='over')
         myModel_over.fit(X_over, y_over)
 
-        myModel_under = OurModel(choosen_params_under)
+        myModel_under = OurModel(sampling_mode='under')
         myModel_under.fit(X_under, y_under)
 
-        myModel_direct = OurModel(choosen_params_direct)
+        myModel_direct = OurModel()
         myModel_direct.fit(X_train, y_train)
 
         # Evaluation of the models
@@ -136,7 +120,7 @@ if __name__ == "__main__":
     df_train = myFE.fit_transform(df_train)
 
     # Analysis of the Data Train
-    DataAnalysis(df_train, "1_train_featEng")
+    #DataAnalysis(df_train, "1_train_featEng")
 
     X_train = np.array(df_train.drop(['Y'], axis=1))
     y_train = np.array(df_train[['Y']]).reshape(-1, )
@@ -155,10 +139,10 @@ if __name__ == "__main__":
     aux[feature_names] = X_over
     aux["Y"] = y_over
     aux = aux.astype(type_dic)
-    DataAnalysis(aux, "2_train_oversampling")
+    #DataAnalysis(aux, "2_train_oversampling")
 
     # Modeling
-    myModel_over = OurModel(choosen_params_over)
+    myModel_over = OurModel(sampling_mode='over')
     myModel_over.fit(X_over, y_over)
 
     print("TESTEEE 2\n")
@@ -169,10 +153,10 @@ if __name__ == "__main__":
     plt.ylabel("Feature")
     plt.show()
 
-    myModel_under = OurModel(choosen_params_under)
+    myModel_under = OurModel(sampling_mode='under')
     myModel_under.fit(X_under, y_under)
 
-    myModel_direct = OurModel(choosen_params_direct)
+    myModel_direct = OurModel()
     myModel_direct.fit(X_train, y_train)
 
     # Preprocessing the test data
