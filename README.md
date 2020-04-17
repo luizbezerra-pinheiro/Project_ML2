@@ -89,3 +89,12 @@ Since it is a binary classification problem, we choose two of the most classical
 
 
 ### Results
+
+Our model performed the best when we used only one feature (months_closed), below you can see these results for the cross-validation performance and the f1-score:
+
+![](results/table_results_onefeature.png)
+
+To see the diference in the performance we plotted the performance (on training and testing) during the evaluation phase for the oversampling and the original sampling, as shown in the two graphics below:
+
+![](results/plot_rf_over.png)
+![](results/plot_rf_original.png)
