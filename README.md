@@ -96,7 +96,7 @@ Our model performed the best when we used only one feature (months_closed), belo
 
 To see the diference in the performance we plotted the performance (on training and testing) during the evaluation phase for the oversampling and the original sampling, as shown in the two graphics below:
 
-<img src="results/plot_rf_original.png" width="160">
+<img src="results/plot_rf_original.png" width="256">
 
-<img src="results/plot_rf_over.png" width="160">
+<img src="results/plot_rf_over.png" width="256">
 
