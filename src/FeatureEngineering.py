@@ -1,5 +1,4 @@
 from src.GetData import GetData
-from src.OurModel import OurModel
 
 from IPython.core.display import display
 import datetime as dt
@@ -297,7 +296,7 @@ class FeatEng:
     def feature_selection_rf(self, df):
         aux = df.drop("Y", axis=1)
 
-        rf = OurModel().models[0]
+        rf = RandomForestClassifier()
         rf.fit(aux, df["Y"])
         feat_imp = [(col, v) for col, v in zip(aux.columns, rf.feature_importances_)]
         feat_imp = sorted(feat_imp, key=lambda x: x[1], reverse=True)
