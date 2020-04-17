@@ -120,7 +120,7 @@ if __name__ == "__main__":
     df_train = myFE.fit_transform(df_train)
 
     # Analysis of the Data Train
-    #DataAnalysis(df_train, "1_train_featEng")
+    DataAnalysis(df_train, "1_train_featEng")
 
     X_train = np.array(df_train.drop(['Y'], axis=1))
     y_train = np.array(df_train[['Y']]).reshape(-1, )
@@ -139,7 +139,7 @@ if __name__ == "__main__":
     aux[feature_names] = X_over
     aux["Y"] = y_over
     aux = aux.astype(type_dic)
-    #DataAnalysis(aux, "2_train_oversampling")
+    DataAnalysis(aux, "2_train_oversampling")
 
     # Modeling
     myModel_over = OurModel(sampling_mode='over')
