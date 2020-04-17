@@ -10,37 +10,14 @@ params_dir = os.path.join(os.path.dirname(os.getcwd()), "params")
 
 class OurModel:
     def __init__(self, sampling_mode=None):
-        params = None
-        if sampling_mode == 'over':
-            try:
-                with open(os.path.join(params_dir, 'hyperparameters_over.json'), 'r') as f:
-                    params = json.load(f)
-                    print('loading oversampling hyperparameters:\n', params)
-            except FileNotFoundError:
-                pass
-        elif sampling_mode == 'under':
-            try:
-                with open(os.path.join(params_dir, 'hyperparameters_under.json'), 'r') as f:
-                    params = json.load(f)
-                    print('loading undersampling hyperparameters:\n', params)
-            except FileNotFoundError:
-                pass
-        else:
-            try:
-                with open(os.path.join(params_dir, 'hyperparameters_direct.json'), 'r') as f:
-                    params = json.load(f)
-                    print('loading directsampling hyperparameters:\n', params)
-            except FileNotFoundError:
-                pass
+        self.params = self.parameters(sampling_mode)
 
-        if params is None:
-            params = [{"n_estimators": 500}, {}, {"epochs": 100, "batch_size": 16}]
-        self.params = params
         self.models = [
-            RandomForestClassifier(random_state=0, **params[0]),  # n_estimators=500, random_state=0,
-            LogisticRegression(random_state=0, **params[1]),
+            RandomForestClassifier(random_state=0, **self.params[0]),  # n_estimators=500, random_state=0,
+            LogisticRegression(random_state=0, **self.params[1]),
             #NeuralClassifier(**params[2])  # epochs=100, batch_size=16,
         ]
+
         self.params_to_tune = [
             {'n_estimators': [int(x) for x in np.linspace(start=200, stop=2000, num=10)],
              # Number of trees in random forest
@@ -64,6 +41,36 @@ class OurModel:
         for m in self.models:
             y_pred.append(m.predict(X_test))
         return y_pred
+
+    def parameters(self, sampling_mode):
+        params = None
+        if sampling_mode == 'over':
+            try:
+                with open(os.path.join(params_dir, 'hyperparameters_over.json'), 'r') as f:
+                    params = json.load(f)
+                    # print('loading oversampling hyperparameters:\n', params)
+            except FileNotFoundError:
+                pass
+        elif sampling_mode == 'under':
+            try:
+                with open(os.path.join(params_dir, 'hyperparameters_under.json'), 'r') as f:
+                    params = json.load(f)
+                    # print('loading undersampling hyperparameters:\n', params)
+            except FileNotFoundError:
+                pass
+        else:
+            try:
+                with open(os.path.join(params_dir, 'hyperparameters_direct.json'), 'r') as f:
+                    params = json.load(f)
+                    # print('loading directsampling hyperparameters:\n', params)
+            except FileNotFoundError:
+                pass
+
+        if params is None:
+            params = [{"n_estimators": 500}, {}, {"epochs": 100, "batch_size": 16}]
+
+        return params
+
 
 
 ## Tests

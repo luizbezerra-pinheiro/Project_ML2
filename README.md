@@ -77,6 +77,22 @@ To solve this problem we followed a classical approach:
 
 ### Feature Engineering
 
+The principals treatment we did in the raw dataset is described below :
+
+- Casting the right type for each features
+- Grouping rare categories into a one typical category
+- Transformation of the datetime features into years/months/days
+- One Hot Encoder for the categorical features
+- Feature selection by using feature importance of random forest
+
+It is important to highlight here the analysis of the most important feature of our
+dataset: months_closed
+
+![](data_analysis/1_train_featEng/months_closed_violin.png)
+
+For months_closed >= 10, we have around 83 % of Y == 1 and 11 % of Y == 0. That is why this feature 
+is really important for our model.
+
 
 ### The Models
 

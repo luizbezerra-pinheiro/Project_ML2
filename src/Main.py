@@ -32,7 +32,7 @@ if __name__ == "__main__":
     y = np.array(df_train[['Y']]).reshape(-1, )
     feature_names = df_train.drop(['Y'], axis=1).columns
 
-    DataAnalysis(df_train, "1_train_featEng")
+    # DataAnalysis(df_train, "1_train_featEng")
 
     ### ----- Cross-validation for the df_train
     skf = StratifiedKFold(n_splits=5)
@@ -145,8 +145,8 @@ if __name__ == "__main__":
     myModel_over = OurModel(sampling_mode='over')
     myModel_over.fit(X_over, y_over)
 
-    print("TESTEEE 2\n")
-    print(myModel_over.models[0].feature_importances_)
+    # print("TESTEEE 2\n")
+    # print(myModel_over.models[0].feature_importances_)
     plt.barh(range(X_over.shape[1]), myModel_over.models[0].feature_importances_, align='center')
     plt.yticks(range(X_over.shape[1]), feature_names)
     plt.xlabel("Feature importance")

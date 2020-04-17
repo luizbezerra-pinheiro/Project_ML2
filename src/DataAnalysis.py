@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -32,3 +33,22 @@ class DataAnalysis:
             sns.catplot(x="Y", y=col, data=self.df)
             plt.savefig(self.file_path(col + "_catplot"))
             plt.clf()
+
+        # print(self.df.shape)
+        # aux = self.df[self.df["months_closed"] >= 10]
+        # aux2 = self.df[self.df["exist_closed"] == 0]
+        # print(self.df["Y"].value_counts())
+        # print(aux["Y"].value_counts())
+        # print(aux2["Y"].value_counts())
+        # print(aux2.head(10))
+        # print()
+        # plt.figure()
+        # # plt.scatter(aux["months_closed"], np.zeros(aux.shape[0]), c=aux["Y"])
+        # plt.hist(aux[aux["Y"]==0]["months_closed"])
+        # plt.hist(aux[aux["Y"] == 1]["months_closed"])
+        # plt.legend()
+        # plt.show()
+        #
+        # sns.distplot(aux[aux["Y"]==1]["months_closed"])
+        # sns.distplot(aux[aux["Y"] == 0]["months_closed"])
+        # plt.show()
