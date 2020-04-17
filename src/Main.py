@@ -32,7 +32,7 @@ if __name__ == "__main__":
     y = np.array(df_train[['Y']]).reshape(-1, )
     feature_names = df_train.drop(['Y'], axis=1).columns
 
-    #DataAnalysis(df_train, "1_train_featEng")
+    DataAnalysis(df_train, "1_train_featEng")
 
     ### ----- Cross-validation for the df_train
     skf = StratifiedKFold(n_splits=5)
