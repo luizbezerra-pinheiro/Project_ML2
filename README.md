@@ -2,6 +2,9 @@
 
 **Authors:** Luiz PINHEIRO and Matheus MARCONDES
 
+Project of MAP569 - Machine Learning II of Ecole Polytechnique.
+Grade : 17 out of 20 (A)
+
 ## Problem
 
 Create a model that predicts whether we can issue credit to a client or not.
